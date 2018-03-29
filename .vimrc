@@ -16,43 +16,46 @@ abbr fitler filter
 
 set nocompatible            " not compatible with vi
 set autoread                " detect when a file is changed
+set langmenu=en_US.UTF-8
 
 set history=1000            " change history to 1000
-set textwidth=500
-set nrformats=
+set textwidth=300
 
 " Specify a directory for plugins
-" - For Neovim: ~/.local/share/nvim/plugged
-" - Avoid using standard Vim directory names like 'plugin'
-call plug#begin('~/.vim/plugged')
+let plugins = ['vim-scripts/The-NERD-Tree',
+			\'vim-airline/vim-airline',
+			\'vim-airline/vim-airline-themes',
+			\'ryanoasis/vim-devicons',
+			\'airblade/vim-gitgutter',
+			\'scrooloose/syntastic',
+			\'ctrlpvim/ctrlp.vim',
+			\'joshdick/onedark.vim',
+			\'gerw/vim-HiLinkTrace',
+			\'jeetsukumaran/vim-buffergator',
+			\'scrooloose/nerdcommenter',
+			\'sheerun/vim-polyglot',
+			\'vim-scripts/ReplaceWithRegister',
+			\'vim-scripts/indentpython.vim',
+			\'bronson/vim-trailing-whitespace',
+			\'Raimondi/delimitMate']
+if has('nvim')
+	call plug#begin('~/.vim/plugged')
 
-Plug 'tpope/vim-fugitive'
-Plug 'vim-scripts/L9'
-Plug 'vim-scripts/The-NERD-Tree'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'ryanoasis/vim-devicons'
-Plug 'airblade/vim-gitgutter'
-" Plug 'Valloric/YouCompleteMe'
-Plug 'scrooloose/syntastic'
-Plug 'nvie/vim-flake8'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'joshdick/onedark.vim'
-Plug 'gerw/vim-HiLinkTrace'
-Plug 'jeetsukumaran/vim-buffergator'
-Plug 'scrooloose/nerdcommenter'
-Plug 'vim-scripts/ReplaceWithRegister'
-Plug 'bronson/vim-trailing-whitespace'
-Plug 'Raimondi/delimitMate'
-Plug 'majutsushi/tagbar'
-Plug 'avelino/vim-bootstrap-updater'
-" Additional syntax highlighting
-Plug 'sheerun/vim-polyglot'
-Plug 'elzr/vim-json'
-" c
-Plug 'vim-scripts/c.vim', {'for': ['c', 'cpp']}
-Plug 'ludwig/split-manpage.vim'
-call plug#end()
+	for plugin in plugins
+		Plug plugin
+	endfor
+
+	call plug#end()
+else
+	call vundel#begin()
+
+	Plugin 'VundleVim/Vundle.vim'
+	for plugin in plugins
+		Plugin plugin
+	endfor
+
+	call vundle#end()
+endif
 
 filetype off                " required
 let loaded_matchparen=1     " don't load matchit.vim (paren/bracket matching)
@@ -61,7 +64,7 @@ let html_no_rendering=1     " don't render italic, bold, links in HTML
 set noshowmatch             " don't match parentheses/brackets
 set nocursorline            " don't paint cursor line
 set nocursorcolumn          " don't paint cursor column
-set number                  " no show line numbers
+set nonumber                  " show line numbers
 
 set nowrap                  " turn on line wrapping
 set wrapmargin=0            " wrap lines when coming within n characters from side
@@ -93,7 +96,7 @@ set foldlevel=1
 
 set clipboard=unnamed
 if !has('nvim')
-	set ttyfast				" faster redrawing
+	set ttyfast                 " faster redrawing
 	set ttyscroll=3
 endif
 set diffopt+=vertical
@@ -115,7 +118,7 @@ set ignorecase              " case insensitive searching
 set smartcase               " case-sensitive if expresson contains a capital letter
 set hlsearch                " highlight search results
 set incsearch               " set incremental search, like modern browsers
-set lazyredraw	            " don't redraw while executing macros
+set lazyredraw            " don't redraw while executing macros
 
 set magic                   " Set magic on, for regex
 
@@ -139,24 +142,26 @@ set showcmd
 " let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
 " let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
 
-" Syntastic
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-set errorformat=%f:%l:\ %m
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_aggregate_errors = 1
-
-let g:syntastic_python_checkers=['flake8', 'dev']
-
-" flake8 setting
-autocmd FileType python map <buffer> <F3> :call Flake8()<CR>
-let g:flake8_show_in_file=1		" show
-let g:flake8_max_markers=500	" maximum # of markers to show(500 is default)
+" vim-flake8
+autocmd FileType python map <buffer>fl :call Flake8()<CR>
+autocmd FileType make setlocal noexpandtab
+let g:flake8_show_in_file=1     " show
+let g:flake8_max_markers=500    " maximum # of markers to show(500 is default)
+" Python indentation like PEP8
+au BufNewFile,BufRead *.py
+    \ set tabstop=4
+    \ set softtabstop=4
+    \ set shiftwidth=4
+    \ set textwidth=79
+    \ set expandtab
+    \ set autoindent
+    \ set fileformat=unix
+au BufNewFile,BufRead *.js, *.html, *.css
+    \ set tabstop=2
+    \ set softtabstop=2
+    \ set shiftwidth=2
+" Flagging Unnecessary Whitespace
+au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 
 if has('nvim')
 	" show results of substition as they're happening
@@ -166,14 +171,14 @@ endif
 
 " Section User Interface
 if &term =~ '256color'
-	" disable background color erase
-	set t_ut=
+    " disable background color erase
+    set t_ut=
 endif
 
 " enable 24 bit color support if supported
 if has("nvim")
-	let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-	set termguicolors
+    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+    set termguicolors
 	tnoremap <Esc> <C-\><C-n>
 	let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
 	" insert mode - line
@@ -186,13 +191,13 @@ elseif ( has("termguicolors") )
 	" set Vim-specific sequences for RGB colors
 	let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 	let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-	set termguicolors
+    set termguicolors
 endif
 
 syntax on
-set synmaxcol=300
+set synmaxcol=200
 syntax sync minlines=256
-colorscheme onedark              " Set the colorscheme
+colorscheme onedark        	  " Set the colorscheme
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
@@ -242,6 +247,7 @@ let g:webdevicons_enable = 1
 " adding the flags to NERDTree
 let g:webdevicons_enable_nerdtree = 1
 
+
 " Key Settings
 nnoremap <F2> :set invpaste paste?<CR>
 set pastetoggle=<F2>
@@ -263,13 +269,13 @@ map <f12> :!start /min ctags -R .<cr>
 
 " go to defn of tag under the cursor
 fun! MatchCaseTag()
-	let ic = &ic
-	set noic
-	try
-		exe 'tjump ' . expand('<cword>')
-	finally
-		let &ic = ic
-	endtry
+    let ic = &ic
+    set noic
+    try
+        exe 'tjump ' . expand('<cword>')
+    finally
+       let &ic = ic
+    endtry
 endfun
 nnoremap <silent> <c-]> :call MatchCaseTag()<CR>
 
@@ -285,8 +291,6 @@ nmap <leader>ww :BuffergatorMruCycleNext<cr>
 nmap <leader>bl :BuffergatorOpen<cr>
 nmap <leader>T :enew<cr>
 nmap <leader>bq :bp <BAR> bd #<cr>
-nmap <leader>bd :1,100bd<CR>
-nmap <leader>bdq : 1,100bd<CR>:q!<CR>
 
 " Clipboard copy/paste
 map <F3> "+Y<CR>
@@ -313,21 +317,6 @@ nnoremap <C-l> :nohlsearch<CR><C-l>
 autocmd InsertEnter * :setlocal nohlsearch
 autocmd InsertLeave * :setlocal hlsearch
 
-" YouCompleteMe
-" let g:ycm_key_list_select_completion=['<C-j>', '<Down>']
-" let g:ycm_key_list_previous_completion=['<C-k>', '<Up>']
-" let g:ycm_autoclose_preview_window_after_completion=1
-
-" nnoremap <leader>g:YcmCompleter GoTo<CR>
-" nnoremap <leader>gg:YcmCompleter GoToImprecise<CR>
-" nnoremap <leader>d:YcmCompleter GoToDeclaration<CR>
-" nnoremap <leader>t:YcmCompleter GetType<CR>
-" nnoremap <leader>p:YcmCompleter GetParent<CR>
-
-" YouCompleteMe Fix
-" let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
-
-
 " Add spaces after comment delimiters by default
 let g:NERDSpaceDelims = 1
 
@@ -348,34 +337,29 @@ augroup vimrc
 augroup END
 
 if has('nvim')
-	:tnoremap <A-h> <C-\><C-n><C-w>h
-	:tnoremap <A-j> <C-\><C-n><C-w>j
-	:tnoremap <A-k> <C-\><C-n><C-w>k
-	:tnoremap <A-l> <C-\><C-n><C-w>l
+    :tnoremap <A-h> <C-\><C-n><C-w>h
+    :tnoremap <A-j> <C-\><C-n><C-w>j
+    :tnoremap <A-k> <C-\><C-n><C-w>k
+    :tnoremap <A-l> <C-\><C-n><C-w>l
 endif
 :nnoremap <A-j> <C-w>j
 :nnoremap <A-k> <C-w>k
 :nnoremap <A-l> <C-w>l
+
 " Search for selected text, forwards or backwards.
 vnoremap <silent> * :<C-U>
-			\let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
-			\gvy/<C-R><C-R>=substitute(
-			\escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
-			\gV:call setreg('"', old_reg, old_regtype)<CR>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy/<C-R><C-R>=substitute(
+  \escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
 vnoremap <silent> # :<C-U>
-			\let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
-			\gvy?<C-R><C-R>=substitute(
-			\escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
-			\gV:call setreg('"', old_reg, old_regtype)<CR>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy?<C-R><C-R>=substitute(
+  \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
 
-" Removes trailing spaces
-function TrimWhiteSpace()
-	%s/\s*$//
-	''
-endfunction
-autocmd FileWritePre * call TrimWhiteSpace()
-autocmd FileAppendPre * call TrimWhiteSpace()
-autocmd FilterWritePre * call TrimWhiteSpace()
-autocmd BufWritePre * call TrimWhiteSpace()
-map <F2> :call TrimWhiteSpace()<CR>
-map! <F2> :call TrimWhiteSpace()<CR>
+" To turn off auto-insert of comments
+augroup auto_comment
+    au!
+    au FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+augroup END
