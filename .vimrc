@@ -38,24 +38,12 @@ let plugins = ['vim-scripts/The-NERD-Tree',
 			\'vim-scripts/indentpython.vim',
 			\'bronson/vim-trailing-whitespace',
 			\'Raimondi/delimitMate']
-if has('nvim')
-	call plug#begin('~/.vim/plugged')
 
-	for plugin in plugins
-		Plug plugin
-	endfor
-
-	call plug#end()
-else
-	call vundel#begin()
-
-	Plugin 'VundleVim/Vundle.vim'
-	for plugin in plugins
-		Plugin plugin
-	endfor
-
-	call vundle#end()
-endif
+call plug#begin('~/.vim/plugged')
+for plugin in plugins
+	Plug plugin
+endfor
+call plug#end()
 
 filetype off                " required
 let loaded_matchparen=1     " don't load matchit.vim (paren/bracket matching)
