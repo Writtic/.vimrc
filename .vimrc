@@ -31,14 +31,13 @@ let plugins = ['vim-scripts/The-NERD-Tree',
 			\'ctrlpvim/ctrlp.vim',
 			\'joshdick/onedark.vim',
 			\'gerw/vim-HiLinkTrace',
+			\'nvie/vim-flake8',
 			\'jeetsukumaran/vim-buffergator',
 			\'scrooloose/nerdcommenter',
 			\'sheerun/vim-polyglot',
 			\'vim-scripts/ReplaceWithRegister',
-			\'vim-scripts/indentpython.vim',
 			\'bronson/vim-trailing-whitespace',
 			\'Raimondi/delimitMate']
-
 call plug#begin('~/.vim/plugged')
 for plugin in plugins
 	Plug plugin
@@ -52,7 +51,7 @@ let html_no_rendering=1     " don't render italic, bold, links in HTML
 set noshowmatch             " don't match parentheses/brackets
 set nocursorline            " don't paint cursor line
 set nocursorcolumn          " don't paint cursor column
-set nonumber                  " show line numbers
+set number                  " show line numbers
 
 set nowrap                  " turn on line wrapping
 set wrapmargin=0            " wrap lines when coming within n characters from side
@@ -70,9 +69,9 @@ set backspace=indent,eol,start
 " Tab control
 set expandtab               " insert tabs rather than spaces for <Tab>
 set smarttab                " tab respects 'tabstop', 'shiftwidth', and 'softtabstop'
-set tabstop=4               " the visible width of tabs
-set softtabstop=4           " edit as if the tabs are 4 characters wide
-set shiftwidth=4            " number of spaces to use for indent and unindent
+set tabstop=2               " the visible width of tabs
+set softtabstop=2           " edit as if the tabs are 4 characters wide
+set shiftwidth=2            " number of spaces to use for indent and unindent
 set shiftround              " round indent to a multiple of 'shiftwidth'
 set completeopt+=longest
 
@@ -126,30 +125,66 @@ set fileformats=unix,dos,mac
 set showcmd
 
 " Change cursor shape
-" let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-" let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
-" let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+if !has('nvim')
+	let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+	let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
+	let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+endif
 
 " vim-flake8
-autocmd FileType python map <buffer>fl :call Flake8()<CR>
-autocmd FileType make setlocal noexpandtab
+au FileType python map <buffer>fl :call Flake8()<CR>
+au FileType make setlocal noexpandtab
 let g:flake8_show_in_file=1     " show
 let g:flake8_max_markers=500    " maximum # of markers to show(500 is default)
+
+" Folding based on indentation
+au FileType python set foldmethod=indent
+
 " Python indentation like PEP8
 au BufNewFile,BufRead *.py
-    \ set tabstop=4
-    \ set softtabstop=4
-    \ set shiftwidth=4
-    \ set textwidth=79
-    \ set expandtab
-    \ set autoindent
-    \ set fileformat=unix
+    \ set tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79 expandtab autoindent fileformat=unix
 au BufNewFile,BufRead *.js, *.html, *.css
-    \ set tabstop=2
-    \ set softtabstop=2
-    \ set shiftwidth=2
-" Flagging Unnecessary Whitespace
+    \ set tabstop=2 softtabstop=2 shiftwidth=2
+
+" Use the below highlight group when displaying bad whitespace is desired.
+highlight BadWhitespace ctermbg=red guibg=red
+
+" Make trailing whitespace be flagged as bad.
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
+" Indent Python in the Google way.
+
+setlocal indentexpr=GetGooglePythonIndent(v:lnum)
+
+let s:maxoff = 50 " maximum number of lines to look backwards.
+
+function GetGooglePythonIndent(lnum)
+  " Indent inside parens.
+  " Align with the open paren unless it is at the end of the line.
+  " E.g.
+  "   open_paren_not_at_EOL(100,
+  "                         (200,
+  "                          300),
+  "                         400)
+  "   open_paren_at_EOL(
+  "       100, 200, 300, 400)
+  call cursor(a:lnum, 1)
+  let [par_line, par_col] = searchpairpos('(\|{\|\[', '', ')\|}\|\]', 'bW',
+        \ "line('.') < " . (a:lnum - s:maxoff) . " ? dummy :"
+        \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
+        \ . " =~ '\\(Comment\\|String\\)$'")
+  if par_line > 0
+    call cursor(par_line, 1)
+    if par_col != col("$") - 1
+      return par_col
+    endif
+  endif
+  " Delegate the rest to the original function.
+  return GetPythonIndent(a:lnum)
+endfunction
+
+let pyindent_nested_paren="&sw*2"
+let pyindent_open_paren="&sw*2"
 
 if has('nvim')
 	" show results of substition as they're happening
@@ -182,18 +217,20 @@ elseif ( has("termguicolors") )
     set termguicolors
 endif
 
+" python syntax
+let g:polyglot_disables = ['python']
+let g:python_highlight_all = 1
+
+
 syntax on
 set synmaxcol=200
 syntax sync minlines=256
-colorscheme onedark        	  " Set the colorscheme
+colorscheme onedark			  " Set the colorscheme
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
 let g:airline#extensions#tabline#fnamemod = ':t' " print only filename on the tap
 let g:airline_powerline_fonts = 1
-
-" python syntax
-let g:python_highlight_all = 1
 
 " devicons
 " set font terminal font or set gui vim font to a Nerd Font (https://github.com/ryanoasis/nerd-fonts):
@@ -234,7 +271,6 @@ let g:webdevicons_enable = 1
 
 " adding the flags to NERDTree
 let g:webdevicons_enable_nerdtree = 1
-
 
 " Key Settings
 nnoremap <F2> :set invpaste paste?<CR>
@@ -351,3 +387,14 @@ augroup auto_comment
     au!
     au FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
+
+" automatically remove trailing whitespace before write
+function! StripTrailingWhitespace()
+  normal mZ
+  %s/\s\+$//e
+  if line("'Z") != line(".")
+    echo "Stripped whitespace\n"
+  endif
+  normal `Z
+endfunction
+autocmd BufWritePre *.py,*.cpp,*.hpp,*.i :call StripTrailingWhitespace()
