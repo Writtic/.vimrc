@@ -465,6 +465,8 @@ augroup END
 
 " Sneak
 let g:sneak#label = 1
+map \ <Plug>Sneak_;
+map ; <Plug>Sneak_,
 
 autocmd ColorScheme * hi! link Sneak Search
 autocmd ColorScheme * hi SneakLabel cterm=bold gui=bold guifg=#E5C07B guibg=#C678DD
