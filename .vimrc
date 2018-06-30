@@ -21,6 +21,7 @@ set langmenu=en_US.UTF-8
 set history=1000            " change history to 1000
 set textwidth=300
 
+
 " Specify a directory for plugins
 " - For Neovim: ~/.local/share/nvim/plugged
 " - Avoid using standard Vim directory names like 'plugin'
@@ -275,6 +276,7 @@ let g:python_highlight_all = 1
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
+
 let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
 let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
@@ -363,8 +365,6 @@ let g:NERDTrimTrailingWhitespace = 1
 
 " NERDTree On shortcut
 nnoremap <leader>nt <ESC>:NERDTree<CR>
-" nnoremap <leader>q :bp<CR>
-" nnoremap <leader>w :bn<CR>
 
 " Ctrl
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
