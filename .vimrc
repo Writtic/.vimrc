@@ -39,7 +39,7 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'vim-airline/vim-airline-themes'
 
     " utils
-    Plug 'justinmk/vim-sneak'
+	Plug 'unblevable/quick-scope'
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'airblade/vim-gitgutter'
     Plug 'jeetsukumaran/vim-buffergator'
@@ -199,6 +199,11 @@ set synmaxcol=200
 syntax sync minlines=256
 colorscheme onedark        	  " Set the colorscheme
 
+" Key Settings
+nnoremap <F2> :set invpaste paste?<CR>
+set pastetoggle=<F2>
+let mapleader = ","
+
 " Move
 nnoremap k gk
 nnoremap gk k
@@ -216,7 +221,7 @@ map Y y$
 vnoremap <leader>y "+y
 
 " select all
-map <Leader>sa ggVG"
+map <leader>sa ggVG"
 " select block
 nnoremap <leader>v V`}
 
@@ -244,6 +249,12 @@ cnoremap <C-e> <End>
 nnoremap # *
 nnoremap * #
 
+" Move across wrapped lines like regular lines
+" Go to the first non-blank character of a line
+noremap 0 ^
+" Just in case you need to go to the very beginning of a line
+noremap ^ 0
+
 " Keep search pattern at the center of the screen.
 nnoremap <silent> n nzz
 nnoremap <silent> N Nzz
@@ -251,9 +262,9 @@ nnoremap <silent> * *zz
 nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 
-nmap <Leader>r  <Plug>ReplaceWithRegisterOperator
-nmap <Leader>rr <Plug>ReplaceWithRegisterLine
-xmap <Leader>r  <Plug>ReplaceWithRegisterVisual
+nmap <leader>r  <Plug>ReplaceWithRegisterOperator
+nmap <leader>rr <Plug>ReplaceWithRegisterLine
+xmap <leader>r  <Plug>ReplaceWithRegisterVisual
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
@@ -316,16 +327,17 @@ let g:airline_theme = 'onedark'
 " make the highlighting of tabs and other non-text less annoying
 highlight SpecialKey ctermbg=none ctermfg=8
 highlight NonText ctermbg=none ctermfg=8
-" highlight Comment cterm=italic
-" highlight htmlArg cterm=italic
 
 " make the highlighting of background transparent
 " This line needs to go below the colorscheme
 highlight Normal guibg=NONE ctermbg=NONE
 autocmd VimEnter * hi Normal ctermbg=NONE
 
+" Italic
 " let g:onedark_termcolors=256
 " let g:onedark_terminal_italics=1
+" highlight Comment cterm=italic
+" highlight htmlArg cterm=italic
 
 " loading the plugin
 let g:webdevicons_enable = 1
@@ -349,11 +361,6 @@ let g:NERDTrimTrailingWhitespace = 1
 nnoremap <leader>nt <ESC>:NERDTree<CR>
 " nnoremap <leader>q :bp<CR>
 " nnoremap <leader>w :bn<CR>
-
-" Key Settings
-nnoremap <F2> :set invpaste paste?<CR>
-set pastetoggle=<F2>
-let mapleader = ","
 
 " Ctrl
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
@@ -463,13 +470,14 @@ augroup auto_comment
     au FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
 
-" Sneak
-let g:sneak#label = 1
-map \ <Plug>Sneak_;
-map ; <Plug>Sneak_,
+" quick-scope
+let g:qs_max_chars=80
 
-autocmd ColorScheme * hi! link Sneak Search
-autocmd ColorScheme * hi SneakLabel cterm=bold gui=bold guifg=#E5C07B guibg=#C678DD
+highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
+highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
+
+" Trigger a highlight in the appropriate direction when pressing these keys:
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 
 " AutoSetFileHead
 autocmd BufNewFile *.sh,*.py exec ":call AutoSetFileHead()"
