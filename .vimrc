@@ -51,6 +51,8 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
+	Plug 'ludovicchabant/vim-gutentags'
+	Plug 'skywind3000/gutentags_plus'
 
     " linter
     Plug 'w0rp/ale'
@@ -392,7 +394,20 @@ nmap <leader>p :CtrlP<cr>
 nmap <leader>bb :CtrlPBuffer<cr>
 nmap <leader>bm :CtrlPMixed<cr>
 nmap <leader>bs :CtrlPMRU<cr>
-map <f12> :!start /min ctags -R .<cr>
+" map <f12> :!start /min ctags -R .<cr>
+
+" Ctags
+" enable gtags module
+let g:gutentags_modules = ['ctags', 'gtags_cscope']
+" config project root markers.
+let g:gutentags_project_root = ['.root']
+" generate datebases in my cache directory, prevent gtags files polluting my project
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+" forbid gutentags adding gtags databases
+let g:gutentags_auto_add_gtags_cscope = 0
+
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
 " go to defn of tag under the cursor
 fun! MatchCaseTag()
