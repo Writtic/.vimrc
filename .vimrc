@@ -51,8 +51,11 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
+
+	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
 	Plug 'skywind3000/gutentags_plus'
+	Plug 'skywind3000/vim-preview'
 
     " linter
     Plug 'w0rp/ale'
@@ -268,10 +271,40 @@ nmap <leader>r  <Plug>ReplaceWithRegisterOperator
 nmap <leader>rr <Plug>ReplaceWithRegisterLine
 xmap <leader>r  <Plug>ReplaceWithRegisterVisual
 
+"Leader lt maps to last tab
+let g:lasttab = 1
+nmap <Leader>lt :exe "tabn ".g:lasttab<CR>
+au TabLeave * let g:lasttab = tabpagenr()
+
+" devicons
+" set font terminal font or set gui vim font to a Nerd Font (https://github.com/ryanoasis/nerd-fonts):
+set encoding=utf8
+set fileencoding=utf-8
+set fileencodings=utf-8
+set bomb
+set binary
+set termencoding=utf-8
+
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
 let g:airline#extensions#tabline#fnamemod = ':t' " print only filename on the tap
 let g:airline_powerline_fonts = 1
+
+" testing rounded separators (extra-powerline-symbols):
+let g:airline_left_sep = ""
+let g:airline_left_alt_sep = ""
+let g:airline_right_sep = ""
+let g:airline_left_alt_sep = ""
+
+" set the CN (column number) symbol:
+let g:airline_section_z = airline#section#create(["\uE0A1" . '%{line(".")}/%L ' . "\uE0A3" . '%{col(".")}'])
+let g:airline_section_y = '%{&fenc . " " . WebDevIconsGetFileFormatSymbol()}'
+let g:airline_theme = 'onedark'
+
+if !exists('g:airline_symbols')
+	let g:airline_symbols = {}
+endif
+let g:airline_symbols.space = "\ua0"
 
 " python syntax
 let g:python_highlight_all = 1
@@ -283,8 +316,7 @@ let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-lates
 let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
 
-imap <expr> <CR>  (pumvisible() ?  "\<c-y>\<Plug>(expand_or_nl)" : "\<CR>")
-imap <expr> <Plug>(expand_or_nl) (cm#completed_is_snippet() ? "\<C-U>":"\<CR>")
+inoremap <expr> <CR> (pumvisible() ? "\<c-y>\<cr>" : "\<CR>")
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"<Paste>
@@ -312,26 +344,6 @@ nmap <C-k> <Plug>(ale_fix)
 " Set this variable to 1 to fix files when you save them.
 let g:ale_fix_on_save = 1
 
-" devicons
-" set font terminal font or set gui vim font to a Nerd Font (https://github.com/ryanoasis/nerd-fonts):
-set encoding=utf8
-" set fillchars+=stl:\ ,stlnc:\
-set fileencoding=utf-8
-set fileencodings=utf-8
-set bomb
-set binary
-set termencoding=utf-8
-" testing rounded separators (extra-powerline-symbols):
-let g:airline_left_sep = ""
-let g:airline_left_alt_sep = ""
-let g:airline_right_sep = ""
-let g:airline_left_alt_sep = ""
-
-" set the CN (column number) symbol:
-" let g:airline_section_z = airline#section#create(['\uE0A1' . '%{line(".")}/['%L']' . '\uE0A3' . '%{col(".")}'])
-let g:airline_section_z = airline#section#create(["\uE0A1" . '%{line(".")}/%L ' . "\uE0A3" . '%{col(".")}'])
-let g:airline_theme = 'onedark'
-
 " make the highlighting of tabs and other non-text less annoying
 highlight SpecialKey ctermbg=none ctermfg=8
 highlight NonText ctermbg=none ctermfg=8
@@ -342,10 +354,10 @@ highlight Normal guibg=NONE ctermbg=NONE
 autocmd VimEnter * hi Normal ctermbg=NONE
 
 " Italic
-" let g:onedark_termcolors=256
-" let g:onedark_terminal_italics=1
-" highlight Comment cterm=italic
-" highlight htmlArg cterm=italic
+let g:onedark_termcolors=256
+let g:onedark_terminal_italics=1
+highlight Comment cterm=italic
+highlight htmlArg cterm=italic
 
 " loading the plugin
 let g:webdevicons_enable = 1
@@ -370,13 +382,12 @@ nnoremap <leader>nt <ESC>:NERDTree<CR>
 
 " Ctrl
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
-let g:ctrlp_custom_ignore = '\v[\/](node_modules|target|dist)|(\.(swp|ico|git|svn))$'
-let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
 let g:ctrlp_custom_ignore = {
   \ 'dir':  '\v[\/]\.(git|hg|svn)$',
   \ 'file': '\v\.(exe|so|dll)$',
   \ 'link': 'some_bad_symbolic_links',
   \ }
+let g:ctrlp_user_command = 'find %s -type f'
 
 " Ctrl-j/k inserts blank line below/above.
 nnoremap <silent><C-j><C-j> :set paste<CR>m`o<Esc>``:set nopaste<CR>
@@ -398,7 +409,7 @@ nmap <leader>bs :CtrlPMRU<cr>
 
 " Ctags
 " enable gtags module
-let g:gutentags_modules = ['ctags', 'gtags_cscope']
+let g:gutentags_modules = ['ctags', 'cscope', 'gtags_cscope']
 " config project root markers.
 let g:gutentags_project_root = ['.root']
 " generate datebases in my cache directory, prevent gtags files polluting my project
@@ -406,8 +417,17 @@ let g:gutentags_cache_dir = expand('~/.cache/tags')
 " forbid gutentags adding gtags databases
 let g:gutentags_auto_add_gtags_cscope = 0
 
+
+noremap <m-u> :PreviewScroll -1<cr>
+noremap <m-d> :PreviewScroll +1<cr>
+inoremap <m-u> <c-\><c-o>:PreviewScroll -1<cr>
+inoremap <m-d> <c-\><c-o>:PreviewScroll +1<cr>
+
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+
+noremap <F5> :PreviewSignature!<cr>
+inoremap <F5> <c-\><c-o>:PreviewSignature!<cr>
 
 " go to defn of tag under the cursor
 fun! MatchCaseTag()
@@ -515,4 +535,16 @@ function! AutoSetFileHead()
     normal G
     normal o
     normal o
-endfunc
+endfunction
+
+" automatically remove trailing whitespace before write
+function! StripTrailingWhitespace()
+	normal mZ
+	%s/\s\+$//e
+	if line("'Z") != line(".")
+		echo "Stripped whitespace\n"
+	endif
+	normal `Z
+endfunction
+
+autocmd! BufWritePost ~/.vimrc nested :source ~/.vimrc
