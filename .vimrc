@@ -21,6 +21,11 @@ set langmenu=en_US.UTF-8
 set history=1000            " change history to 1000
 set textwidth=300
 
+if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
+    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
+        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
 
 " Specify a directory for plugins
 " - For Neovim: ~/.local/share/nvim/plugged
