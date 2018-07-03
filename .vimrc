@@ -159,7 +159,7 @@ set nobackup
 set noswapfile
 set fileformats=unix,dos,mac
 set showcmd
-set backspace=2 " make backspace work like most other programs<Paste>
+set backspace=2 " make backspace work like most other programs
 
 if has('nvim')
 	" show results of substition as they're happening
@@ -326,7 +326,7 @@ let g:deoplete#auto_complete_delay = 1000
 inoremap <expr> <CR> (pumvisible() ? "\<c-y>\<cr>" : "\<CR>")
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"<Paste>
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
 " ale
 nmap <silent> <C-k><C-j> <Plug>(ale_previous_wrap)
