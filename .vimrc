@@ -159,6 +159,7 @@ set nobackup
 set noswapfile
 set fileformats=unix,dos,mac
 set showcmd
+set backspace=2 " make backspace work like most other programs
 
 if has('nvim')
 	" show results of substition as they're happening
@@ -320,6 +321,7 @@ let g:deoplete#enable_at_startup = 1
 let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
 let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
+let g:deoplete#auto_complete_delay = 1000
 
 inoremap <expr> <CR> (pumvisible() ? "\<c-y>\<cr>" : "\<CR>")
 
@@ -348,6 +350,11 @@ nmap <C-k> <Plug>(ale_fix)
 
 " Set this variable to 1 to fix files when you save them.
 let g:ale_fix_on_save = 1
+let g:ale_set_loclist = 0
+let g:ale_set_quickfix = 1
+let g:ale_list_window_size = 5  " Show 5 lines of errors (default: 10)
+let g:ale_lint_on_text_changed = 'never'  " Remove lag
+let g:ale_lint_on_enter = 0  " no linting on entering file
 
 " make the highlighting of tabs and other non-text less annoying
 highlight SpecialKey ctermbg=none ctermfg=8
