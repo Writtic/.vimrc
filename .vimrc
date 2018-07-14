@@ -228,7 +228,7 @@ noremap L $
 " y$ -> Y Make Y behave like other capitals
 map Y y$
 
-" 선택한 영역을 시스템 클립 보드로 복사
+" copy the selected area to clipboard
 vnoremap <leader>y "+y
 
 " select all
@@ -307,19 +307,19 @@ let g:airline_section_z = airline#section#create(["\uE0A1" . '%{line(".")}/%L ' 
 let g:airline_section_y = '%{&fenc . " " . WebDevIconsGetFileFormatSymbol()}'
 let g:airline_theme = 'onedark'
 
-if !exists('g:airline_symbols')
-	let g:airline_symbols = {}
-endif
-let g:airline_symbols.space = "\ua0"
-
 " python syntax
 let g:python_highlight_all = 1
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
 
-let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
-let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
+if has('mac')
+	let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
+	let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
+else
+	let g:deoplete#sources#clang#libclang_path = '/home/deploy/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
+	let g:deoplete#sources#clang#clang_header = '/home/deploy/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
+endif
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
 let g:deoplete#auto_complete_delay = 1000
 
@@ -421,7 +421,7 @@ nmap <leader>bs :CtrlPMRU<cr>
 
 " Ctags
 " enable gtags module
-let g:gutentags_modules = ['ctags', 'cscope', 'gtags_cscope']
+let g:gutentags_modules = ['ctags', 'gtags_cscope']
 " config project root markers.
 let g:gutentags_project_root = ['.root']
 " generate datebases in my cache directory, prevent gtags files polluting my project
