@@ -236,7 +236,7 @@ noremap L $
 " y$ -> Y Make Y behave like other capitals
 map Y y$
 
-" 선택한 영역을 시스템 클립 보드로 복사
+" copy the selected area to clipboard
 vnoremap <leader>y "+y
 
 " select all
@@ -343,11 +343,6 @@ let g:airline_left_alt_sep = ""
 let g:airline_section_z = airline#section#create(["\uE0A1" . '%{line(".")}/%L ' . "\uE0A3" . '%{col(".")}'])
 let g:airline_section_y = '%{&fenc . " " . WebDevIconsGetFileFormatSymbol()}'
 let g:airline_theme = 'onedark'
-
-if !exists('g:airline_symbols')
-	let g:airline_symbols = {}
-endif
-let g:airline_symbols.space = "\ua0"
 
 " python syntax
 let g:python_highlight_all = 1
