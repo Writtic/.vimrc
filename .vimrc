@@ -56,6 +56,12 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
+	Plug 'Shougo/vimshell.vim'
+	Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+
+	" Language support
+	Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+	Plug 'sebdah/vim-delve'
 
 	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
@@ -74,7 +80,7 @@ call plug#begin('~/.local/share/nvim/plugged')
         Plug 'roxma/vim-hug-neovim-rpc'
     endif
     Plug 'zchee/deoplete-clang'
-    Plug 'zchee/deoplete-go', { 'do': 'make'}
+    Plug 'zchee/deoplete-go', { 'do': 'make' }
     Plug 'zchee/deoplete-jedi'
     Plug 'Shougo/neco-vim'
     Plug 'roxma/python-support.nvim'
@@ -82,7 +88,7 @@ call plug#end()
 
 filetype off                " required
 let loaded_matchparen=1     " don't load matchit.vim (paren/bracket matching)
-let html_no_rendering=1     " don't render italic, bold, links in HTML
+" let html_no_rendering=1     " don't render italic, bold, links in HTML
 
 set noshowmatch             " don't match parentheses/brackets
 set nocursorline            " don't paint cursor line
@@ -95,6 +101,8 @@ set formatoptions=l
 
 set autoindent              " automatically set indent of new line
 set smartindent
+
+set updatetime=100
 
 " highlight conflicts
 match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
@@ -171,7 +179,7 @@ endif
 
 " FastEscape {{{
 " Speed up transition from modes
-if ! has('gui_running')
+if !has('gui_running')
   set ttimeoutlen=10
   augroup FastEscape
     autocmd!
@@ -291,6 +299,35 @@ set bomb
 set binary
 set termencoding=utf-8
 
+" Jump between errors in quickfix list
+map <C-n> :cnext<CR>
+map <C-m> :cprevious<CR>
+nnoremap <leader>a :cclose<CR>
+
+" Golang settings
+let g:go_term_enabled = 1
+let g:go_auto_type_info = 1
+let g:go_list_type = "quickfix"
+let g:go_play_browser_command = "chrome"
+
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_extra_types = 1
+
+autocmd FileType go nmap <leader>gb <Plug>(go-build)
+autocmd FileType go nmap <leader>gt <Plug>(go-test)
+autocmd FileType go nmap <leader>gr <Plug>(go-run)
+autocmd FileType go nmap <leader>gi <Plug>(go-info)
+autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
+
+autocmd FileType go nmap <leader>gd :DlvDebug<CR>
+autocmd FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
+autocmd FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
+autocmd FileType go nmap <leader>gg :DlvClearAll<CR>
+
+autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
 let g:airline#extensions#tabline#fnamemod = ':t' " print only filename on the tap
@@ -318,8 +355,13 @@ let g:python_highlight_all = 1
 " deoplete
 let g:deoplete#enable_at_startup = 1
 
-let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/libclang.so'
-let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/envs/wally/lib/clang'
+if has('mac')
+	let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/lib/libclang.so'
+	let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/lib/clang'
+else
+	let g:deoplete#sources#clang#libclang_path = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/libclang.so'
+	let g:deoplete#sources#clang#clang_header = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/clang'
+endif
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
 let g:deoplete#auto_complete_delay = 1000
 
@@ -413,15 +455,15 @@ inoremap <C-c> <Esc>
 
 " CtrlP setting
 let g:ctrlp_working_path_mode = 'r'
-nmap <leader>p :CtrlP<cr>
-nmap <leader>bb :CtrlPBuffer<cr>
-nmap <leader>bm :CtrlPMixed<cr>
-nmap <leader>bs :CtrlPMRU<cr>
-" map <f12> :!start /min ctags -R .<cr>
+nmap <leader>p :CtrlP<CR>
+nmap <leader>bb :CtrlPBuffer<CR>
+nmap <leader>bm :CtrlPMixed<CR>
+nmap <leader>bs :CtrlPMRU<CR>
+" map <f12> :!start /min ctags -R .<CR>
 
 " Ctags
 " enable gtags module
-let g:gutentags_modules = ['ctags', 'cscope', 'gtags_cscope']
+let g:gutentags_modules = ['ctags', 'gtags_cscope']
 " config project root markers.
 let g:gutentags_project_root = ['.root']
 " generate datebases in my cache directory, prevent gtags files polluting my project
@@ -430,16 +472,16 @@ let g:gutentags_cache_dir = expand('~/.cache/tags')
 let g:gutentags_auto_add_gtags_cscope = 0
 
 
-noremap <m-u> :PreviewScroll -1<cr>
-noremap <m-d> :PreviewScroll +1<cr>
-inoremap <m-u> <c-\><c-o>:PreviewScroll -1<cr>
-inoremap <m-d> <c-\><c-o>:PreviewScroll +1<cr>
+noremap <m-u> :PreviewScroll -1<CR>
+noremap <m-d> :PreviewScroll +1<CR>
+inoremap <m-u> <c-\><c-o>:PreviewScroll -1<CR>
+inoremap <m-d> <c-\><c-o>:PreviewScroll +1<CR>
 
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
-noremap <F5> :PreviewSignature!<cr>
-inoremap <F5> <c-\><c-o>:PreviewSignature!<cr>
+noremap <F5> :PreviewSignature!<CR>
+inoremap <F5> <c-\><c-o>:PreviewSignature!<CR>
 
 " go to defn of tag under the cursor
 fun! MatchCaseTag()
@@ -460,11 +502,11 @@ let g:buffergator_viewport_split_policy = 'R'
 let g:buffergator_suppress_keymaps = 1
 " Looper buffers
 let g:buffergator_mru_cycle_loop = 1
-nmap <leader>qq :BuffergatorMruCyclePrev<cr>
-nmap <leader>ww :BuffergatorMruCycleNext<cr>
-nmap <leader>bl :BuffergatorOpen<cr>
-nmap <leader>T :enew<cr>
-nmap <leader>bq :bp <BAR> bd #<cr>
+nmap <leader>qq :BuffergatorMruCyclePrev<CR>
+nmap <leader>ww :BuffergatorMruCycleNext<CR>
+nmap <leader>bl :BuffergatorOpen<CR>
+nmap <leader>T :enew<CR>
+nmap <leader>bq :bp <BAR> bd #<CR>
 
 nnoremap <F3> :set list! list?<CR>
 nnoremap <F4> :set wrap! wrap?<CR>
@@ -529,6 +571,7 @@ highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=und
 
 " Trigger a highlight in the appropriate direction when pressing these keys:
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+
 
 " AutoSetFileHead
 autocmd BufNewFile *.sh,*.py exec ":call AutoSetFileHead()"
