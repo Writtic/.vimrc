@@ -56,6 +56,7 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
+	Plug 'terryma/vim-multiple-cursors'
 	Plug 'Shougo/vimshell.vim'
 	Plug 'Shougo/vimproc.vim', { 'do': 'make' }
 
@@ -117,6 +118,9 @@ set tabstop=4               " the visible width of tabs
 set softtabstop=4           " edit as if the tabs are 4 characters wide
 set shiftwidth=4            " number of spaces to use for indent and unindent
 set shiftround              " round indent to a multiple of 'shiftwidth'
+" neocomplete like
+" set completeopt+=noinsert
+" deoplete.nvim recommed
 set completeopt+=longest
 
 " code folding settings
@@ -299,34 +303,52 @@ set bomb
 set binary
 set termencoding=utf-8
 
-" Jump between errors in quickfix list
-map <C-n> :cnext<CR>
-map <C-m> :cprevious<CR>
-nnoremap <leader>a :cclose<CR>
-
 " Golang settings
 let g:go_term_enabled = 1
 let g:go_auto_type_info = 1
 let g:go_list_type = "quickfix"
+let g:go_test_timeout = '10s'
 let g:go_play_browser_command = "chrome"
 
-let g:go_highlight_types = 1
-let g:go_highlight_fields = 1
-let g:go_highlight_function_calls = 1
+let g:go_highlight_build_constraints = 1
 let g:go_highlight_extra_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_types = 1
 
-autocmd FileType go nmap <leader>gb <Plug>(go-build)
-autocmd FileType go nmap <leader>gt <Plug>(go-test)
-autocmd FileType go nmap <leader>gr <Plug>(go-run)
-autocmd FileType go nmap <leader>gi <Plug>(go-info)
-autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
+" Auto import dependencies
+let g:go_fmt_command = "goimports"
 
-autocmd FileType go nmap <leader>gd :DlvDebug<CR>
-autocmd FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
-autocmd FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
-autocmd FileType go nmap <leader>gg :DlvClearAll<CR>
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
 
-autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
+au FileType go nmap <leader>gr <Plug>(go-run)
+au FileType go nmap <leader>gi <Plug>(go-info)
+au FileType go nmap <Leader>gp <Plug>(go-play)
+au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
+au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
+au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
+au FileType go nmap <leader>gt :GoDeclsDir<CR>
+au FileType go nmap <F9> :GoCoverageToggle -short<CR>
+au FileType go nmap <F12> <Plug>(go-def)
+
+au FileType go nmap <leader>gd :DlvDebug<CR>
+au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
+au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
+au FileType go nmap <leader>gg :DlvClearAll<CR>
+
+au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
@@ -348,8 +370,20 @@ let g:airline_theme = 'onedark'
 let g:python_highlight_all = 1
 
 " deoplete
-let g:deoplete#enable_at_startup = 1
+if has('nvim')
+	" Enable deoplete on startup
+	let g:deoplete#enable_at_startup = 1
+endif
 
+" Disable deoplete when in multi cursor mode
+function! Multiple_cursors_before()
+    let b:deoplete_disable_auto_complete = 1
+endfunction
+function! Multiple_cursors_after()
+    let b:deoplete_disable_auto_complete = 0
+endfunction
+
+" deoplete-clang
 if has('mac')
 	let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/lib/libclang.so'
 	let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/lib/clang'
@@ -360,6 +394,10 @@ endif
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
 let g:deoplete#auto_complete_delay = 1000
 
+" deoplete-golang
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+
 inoremap <expr> <CR> (pumvisible() ? "\<c-y>\<cr>" : "\<CR>")
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
@@ -369,6 +407,11 @@ inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 nmap <silent> <C-k><C-j> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j><C-k> <Plug>(ale_next_wrap)
 
+" Error and warning signs.
+let g:ale_sign_error = '⤫'
+let g:ale_sign_warning = '⚠'
+
+" Enable integration with airline
 let g:airline#extensions#ale#enabled = 1
 let g:ale_lint_delay = 1000
 
@@ -446,7 +489,20 @@ nnoremap <silent><C-k><C-k> :set paste<CR>m`O<Esc>``:set nopaste<CR>
 nnoremap <space> i<space><Esc>l
 
 " Mapping Esc to Ctrl-c
-inoremap <C-c> <Esc>
+map <C-c> <Esc>
+
+" vim-multiple-cursors
+let g:multi_cursor_use_default_mapping = 0
+
+" Default mapping
+let g:multi_cursor_start_word_key      = '<C-n>'
+let g:multi_cursor_select_all_word_key = '<A-n>'
+let g:multi_cursor_start_key           = 'g<C-n>'
+let g:multi_cursor_select_all_key      = 'g<A-n>'
+let g:multi_cursor_next_key            = '<C-n>'
+let g:multi_cursor_prev_key            = '<C-p>'
+let g:multi_cursor_skip_key            = '<C-x>'
+let g:multi_cursor_quit_key            = '<C-c>'
 
 " CtrlP setting
 let g:ctrlp_working_path_mode = 'r'
