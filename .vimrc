@@ -1,3 +1,8 @@
+"    _      _ __        _
+"   (_)__  (_) /_ _  __(_)_ _
+"  / / _ \/ / __/| |/ / /  ' \
+" /_/_//_/_/\__(_)___/_/_/_/_/
+
 " Abbreviations
 cnoreabbrev W! w!
 cnoreabbrev Q! q!
@@ -19,7 +24,7 @@ set autoread                " detect when a file is changed
 set langmenu=en_US.UTF-8
 
 set history=1000            " change history to 1000
-set textwidth=300
+set textwidth=250
 
 if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
     silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
@@ -43,7 +48,11 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
 
+	" tmux
+	Plug 'tmux-plugins/vim-tmux-focus-events'
+
     " utils
+	Plug 'vim-scripts/Rename'
 	Plug 'unblevable/quick-scope'
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'airblade/vim-gitgutter'
@@ -56,12 +65,16 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
-	Plug 'terryma/vim-multiple-cursors'
-	Plug 'Shougo/vimshell.vim'
-	Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+    Plug 'Shougo/echodoc.vim'
+    Plug 'Shougo/vimshell.vim'
+    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+	Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do' : './install --all' }
+	Plug 'junegunn/fzf.vim'
 
 	" Language support
+	Plug 'davidhalter/jedi-vim'
 	Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+	Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 	Plug 'sebdah/vim-delve'
 
 	" Ctags / Cscope
@@ -73,21 +86,19 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'w0rp/ale'
 
     " auto completion
-    if has('nvim')
-        Plug 'Shougo/deoplete.nvim'
-    else
-        Plug 'Shougo/deoplete.nvim'
-        Plug 'roxma/nvim-yarp'
-        Plug 'roxma/vim-hug-neovim-rpc'
-    endif
-    Plug 'zchee/deoplete-clang'
-    Plug 'zchee/deoplete-go', { 'do': 'make' }
-    Plug 'zchee/deoplete-jedi'
-    Plug 'Shougo/neco-vim'
-    Plug 'roxma/python-support.nvim'
+	if has('nvim')
+		Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+	else
+		Plug 'Shougo/deoplete.nvim'
+		Plug 'roxma/nvim-yarp'
+		Plug 'roxma/vim-hug-neovim-rpc'
+	endif
+	Plug 'zchee/deoplete-clang'
+	Plug 'zchee/deoplete-go', { 'do': 'make' }
+	Plug 'zchee/deoplete-jedi'
 call plug#end()
 
-filetype off                " required
+filetype plugin on
 let loaded_matchparen=1     " don't load matchit.vim (paren/bracket matching)
 " let html_no_rendering=1     " don't render italic, bold, links in HTML
 
@@ -119,9 +130,8 @@ set softtabstop=4           " edit as if the tabs are 4 characters wide
 set shiftwidth=4            " number of spaces to use for indent and unindent
 set shiftround              " round indent to a multiple of 'shiftwidth'
 " neocomplete like
-" set completeopt+=noinsert
-" deoplete.nvim recommed
-set completeopt+=longest
+set completeopt=longest,menuone
+set completeopt-=preview
 
 " code folding settings
 set foldmethod=syntax       " fold based on indent
@@ -141,6 +151,7 @@ set scrolljump=7            " scroll 7 lines at a time at bottom/top
 set wildmenu                " enhanced command line completion
 set hidden                  " current buffer can be put into background
 set showcmd                 " show incomplete commands
+set shortmess+=c
 set noshowmode              " don't show which mode disabled for PowerLine
 set wildmode=list:longest   " complete files like a shell
 set scrolloff=3             " lines of text around cursor
@@ -192,6 +203,52 @@ if !has('gui_running')
   augroup END
 endif
 " }}}
+" FZF
+let g:fzf_colors =
+            \ { 'fg':      ['fg', 'Normal'],
+            \ 'bg':      ['bg', 'Normal'],
+            \ 'hl':      ['fg', 'Comment'],
+            \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+            \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+            \ 'hl+':     ['fg', 'Statement'],
+            \ 'info':    ['fg', 'PreProc'],
+            \ 'prompt':  ['fg', 'Conditional'],
+            \ 'pointer': ['fg', 'Exception'],
+            \ 'marker':  ['fg', 'Keyword'],
+            \ 'spinner': ['fg', 'Label'],
+            \ 'header':  ['fg', 'Comment'] }
+
+" add Rg command for ripgrep
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+function! s:fzf_statusline()
+  " Override statusline as you like
+  highlight fzf1 ctermfg=161 ctermbg=251
+  highlight fzf2 ctermfg=23 ctermbg=251
+  highlight fzf3 ctermfg=237 ctermbg=251
+  setlocal statusline=%#fzf1#\ >\ %#fzf2#fz%#fzf3#f
+endfunction
+
+" Mapping selecting mappings Mapp
+nmap <leader><tab> <plug>(fzf-maps-n)
+xmap <leader><tab> <plug>(fzf-maps-x)
+omap <leader><tab> <plug>(fzf-maps-o)
+
+" Insert mode completion
+imap <c-x><c-k> <plug>(fzf-complete-word)
+imap <c-x><c-f> <plug>(fzf-complete-path)
+imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+imap <c-x><c-l> <plug>(fzf-complete-line)
+
+" Advanced customization using autoload functions
+inoremap <expr> <c-x><c-k> fzf#vim#complete#word({'left': '15%'})
+
+autocmd! User FzfStatusLine call <SID>fzf_statusline()
 
 " Section User Interface
 if &term =~ '256color'
@@ -225,7 +282,7 @@ colorscheme onedark        	  " Set the colorscheme
 " Key Settings
 nnoremap <F2> :set invpaste paste?<CR>
 set pastetoggle=<F2>
-let mapleader = ","
+let g:mapleader = ","
 
 " Move
 nnoremap k gk
@@ -256,6 +313,10 @@ nnoremap <C-y> 2<C-y>
 nnoremap <leader>q :q<CR>
 " Quickly save the current file
 nnoremap <leader>w :w<CR>
+imap ,w <esc>:w<CR>
+
+" Select another file from the directory of the current one
+nnoremap <leader>F :execute 'edit' expand("%:p:h")<cr>
 
 " remap U to <C-r> for easier redo
 nnoremap U <C-r>
@@ -263,10 +324,10 @@ nnoremap U <C-r>
 set t_kb=^V<BS>
 set t_kD=^V<DEL>
 
-cnoremap <C-j> <t_kd>
-cnoremap <C-k> <t_ku>
-cnoremap <C-a> <Home>
-cnoremap <C-e> <End>
+" cnoremap <C-j> <t_kd>
+" cnoremap <C-k> <t_ku>
+" cnoremap <C-a> <Home>
+" cnoremap <C-e> <End>
 
 " Switch # *
 nnoremap # *
@@ -292,7 +353,7 @@ xmap <leader>r  <Plug>ReplaceWithRegisterVisual
 "Leader lt maps to last tab
 let g:lasttab = 1
 nmap <Leader>lt :exe "tabn ".g:lasttab<CR>
-au TabLeave * let g:lasttab = tabpagenr()
+autocmd TabLeave * let g:lasttab = tabpagenr()
 
 " devicons
 " set font terminal font or set gui vim font to a Nerd Font (https://github.com/ryanoasis/nerd-fonts):
@@ -303,45 +364,34 @@ set bomb
 set binary
 set termencoding=utf-8
 
+" Jump between errors in quickfix list
+map <C-n> :cnext<CR>
+map <C-m> :cprevious<CR>
+nnoremap <leader>a :cclose<CR>
+
 " Golang settings
-let g:go_term_enabled = 1
 let g:go_auto_type_info = 1
-let g:go_list_type = "quickfix"
-let g:go_test_timeout = '10s'
-let g:go_play_browser_command = "chrome"
 
 let g:go_highlight_build_constraints = 1
 let g:go_highlight_extra_types = 1
 let g:go_highlight_fields = 1
 let g:go_highlight_functions = 1
-let g:go_highlight_methods = 1
+let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
-let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
 
-" Auto import dependencies
-let g:go_fmt_command = "goimports"
-
-" run :GoBuild or :GoTestCompile based on the go file
-function! s:build_go_files()
-  let l:file = expand('%')
-  if l:file =~# '^\f\+_test\.go$'
-    call go#test#Test(0, 1)
-  elseif l:file =~# '^\f\+\.go$'
-    call go#cmd#Build(0)
-  endif
-endfunction
-
-au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
+au FileType go nmap <leader>gb <Plug>(go-build)
 au FileType go nmap <leader>gr <Plug>(go-run)
 au FileType go nmap <leader>gi <Plug>(go-info)
-au FileType go nmap <Leader>gp <Plug>(go-play)
+au FileType go nmap <leader>gp <Plug>(go-play)
+au FileType go nmap <leader>gt :GoDeclsDir<CR>
 au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
 au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
 au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
-au FileType go nmap <leader>gt :GoDeclsDir<CR>
 au FileType go nmap <F9> :GoCoverageToggle -short<CR>
-au FileType go nmap <F12> <Plug>(go-def)
+au FileType go nmap <F10> :GoTest -short<CR>
+au FileType go nmap <F12> <Plug>(go-def-tab)
+au FileType go nmap <leader>gm :GoImports<CR>
 
 au FileType go nmap <leader>gd :DlvDebug<CR>
 au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
@@ -349,6 +399,9 @@ au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
 au FileType go nmap <leader>gg :DlvClearAll<CR>
 
 au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+
+" Jedi settings
+let g:jedi#completions_enabled = 0
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
@@ -369,24 +422,24 @@ let g:airline_theme = 'onedark'
 " python syntax
 let g:python_highlight_all = 1
 
-" deoplete
-if has('nvim')
-	" Enable deoplete on startup
-	let g:deoplete#enable_at_startup = 1
-endif
+" python settings
+let g:python_host_prog = '/Users/johan/.pyenv/versions/2.7.11/envs/nvim2/bin/python2.7'
+let g:python3_host_prog = '/Users/johan/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
 
-" Disable deoplete when in multi cursor mode
-function! Multiple_cursors_before()
-    let b:deoplete_disable_auto_complete = 1
-endfunction
-function! Multiple_cursors_after()
-    let b:deoplete_disable_auto_complete = 0
-endfunction
+" Skip the check of neovim module
+let g:python3_host_skip_check = 1
+
+" deoplete
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_smart_case = 1
+let g:deoplete#enable_ignore_case = 1
+
+let g:echodoc#enable_at_startup = 1
 
 " deoplete-clang
 if has('mac')
-	let g:deoplete#sources#clang#libclang_path = '~/.pyenv/versions/miniconda3-latest/lib/libclang.so'
-	let g:deoplete#sources#clang#clang_header = '~/.pyenv/versions/miniconda3-latest/lib/clang'
+	let g:deoplete#sources#clang#libclang_path = '/Users/johan/.pyenv/versions/miniconda3-latest/lib/libclang.dylib'
+	let g:deoplete#sources#clang#clang_header = '/Users/johan/.pyenv/versions/miniconda3-latest/lib/clang'
 else
 	let g:deoplete#sources#clang#libclang_path = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/libclang.so'
 	let g:deoplete#sources#clang#clang_header = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/clang'
@@ -395,13 +448,22 @@ let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', '
 let g:deoplete#auto_complete_delay = 1000
 
 " deoplete-golang
-let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+let g:deoplete#sources#go#gocode_binary = '/Users/johan/go/bin/gocode'
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
-inoremap <expr> <CR> (pumvisible() ? "\<c-y>\<cr>" : "\<CR>")
+" deoplete-jedi
+let g:deoplete#sources#jedi#popup_select_first = 1
+let g:deoplete#sources#jedi#show_call_signatures = 0
+let g:deoplete#sources#jedi#enable_cache = 1
 
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <silent><expr> <TAB>
+    \ pumvisible() ? "\<C-n>" :
+    \ <SID>check_back_space() ? "\<TAB>" :
+    \ deoplete#mappings#manual_complete()
+function! s:check_back_space() abort "{{{
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~ '\s'
+endfunction"}}}
 
 " ale
 nmap <silent> <C-k><C-j> <Plug>(ale_previous_wrap)
@@ -413,6 +475,7 @@ let g:ale_sign_warning = '⚠'
 
 " Enable integration with airline
 let g:airline#extensions#ale#enabled = 1
+let b:ale_warn_about_trailing_whitespace = 0
 let g:ale_lint_delay = 1000
 
 let g:ale_linters = {'python': ['flake8'],
@@ -482,27 +545,14 @@ let g:ctrlp_custom_ignore = {
 let g:ctrlp_user_command = 'find %s -type f'
 
 " Ctrl-j/k inserts blank line below/above.
-nnoremap <silent><C-j><C-j> :set paste<CR>m`o<Esc>``:set nopaste<CR>
-nnoremap <silent><C-k><C-k> :set paste<CR>m`O<Esc>``:set nopaste<CR>
+nnoremap <silent> <C-j><C-j> :set paste<CR>m`o<Esc>``:set nopaste<CR>
+nnoremap <silent> <C-k><C-k> :set paste<CR>m`O<Esc>``:set nopaste<CR>
 
 " Insert single space in normal mode
 nnoremap <space> i<space><Esc>l
 
 " Mapping Esc to Ctrl-c
 map <C-c> <Esc>
-
-" vim-multiple-cursors
-let g:multi_cursor_use_default_mapping = 0
-
-" Default mapping
-let g:multi_cursor_start_word_key      = '<C-n>'
-let g:multi_cursor_select_all_word_key = '<A-n>'
-let g:multi_cursor_start_key           = 'g<C-n>'
-let g:multi_cursor_select_all_key      = 'g<A-n>'
-let g:multi_cursor_next_key            = '<C-n>'
-let g:multi_cursor_prev_key            = '<C-p>'
-let g:multi_cursor_skip_key            = '<C-x>'
-let g:multi_cursor_quit_key            = '<C-c>'
 
 " CtrlP setting
 let g:ctrlp_working_path_mode = 'r'
@@ -530,9 +580,6 @@ inoremap <m-d> <c-\><c-o>:PreviewScroll +1<CR>
 
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
-
-noremap <F5> :PreviewSignature!<CR>
-inoremap <F5> <c-\><c-o>:PreviewSignature!<CR>
 
 " go to defn of tag under the cursor
 fun! MatchCaseTag()
