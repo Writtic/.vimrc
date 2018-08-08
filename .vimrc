@@ -76,6 +76,7 @@ call plug#begin('~/.local/share/nvim/plugged')
 	Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 	Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 	Plug 'sebdah/vim-delve'
+	Plug 'posva/vim-vue'
 
 	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
@@ -421,10 +422,18 @@ let g:airline_theme = 'onedark'
 
 " python syntax
 let g:python_highlight_all = 1
+let g:python_highlight_builtins = 1
+let g:python_highlight_builtins_objs = 1
+let g:python_highlight_builtin_funcs = 1
+let g:python_highlight_exceptions = 1
+let g:python_highlight_string_formatting = 1
+let g:python_highlight_string_format = 1
+let g:python_highlight_string_templates = 1
+let g:python_highlight_class_vars = 1
 
 " python settings
-let g:python_host_prog = '/Users/johan/.pyenv/versions/2.7.11/envs/nvim2/bin/python2.7'
-let g:python3_host_prog = '/Users/johan/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
+let g:python_host_prog = $HOME. '/.pyenv/versions/2.7.11/envs/nvim2/bin/python2.7'
+let g:python3_host_prog = $HOME. '/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
 
 " Skip the check of neovim module
 let g:python3_host_skip_check = 1
@@ -438,17 +447,17 @@ let g:echodoc#enable_at_startup = 1
 
 " deoplete-clang
 if has('mac')
-	let g:deoplete#sources#clang#libclang_path = '/Users/johan/.pyenv/versions/miniconda3-latest/lib/libclang.dylib'
-	let g:deoplete#sources#clang#clang_header = '/Users/johan/.pyenv/versions/miniconda3-latest/lib/clang'
+	let g:deoplete#sources#clang#libclang_path = '/usr/local/opt/llvm/lib/libclang.dylib'
+	let g:deoplete#sources#clang#clang_header = '/usr/local/opt/llvm/lib/clang'
 else
-	let g:deoplete#sources#clang#libclang_path = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/libclang.so'
-	let g:deoplete#sources#clang#clang_header = '/home/deploy/.pyenv/versions/miniconda3-latest/lib/clang'
+	let g:deoplete#sources#clang#libclang_path = $HOME. '/.pyenv/versions/miniconda3-latest/lib/libclang.so'
+	let g:deoplete#sources#clang#clang_header = $HOME. '/.pyenv/versions/miniconda3-latest/lib/clang'
 endif
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
 let g:deoplete#auto_complete_delay = 1000
 
 " deoplete-golang
-let g:deoplete#sources#go#gocode_binary = '/Users/johan/go/bin/gocode'
+let g:deoplete#sources#go#gocode_binary = $HOME. '/go/bin/gocode'
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
 " deoplete-jedi
@@ -482,12 +491,14 @@ let g:ale_linters = {'python': ['flake8'],
 					\'C': ['gcc', 'clang','cpplint'],
 					\'C++': ['gcc', 'clang','cpplint'],
 					\'go': ['golint'],
+					\'javascript': ['eslint'],
 					\'bash': ['shell -n flag'],
 					\'JSON': ['jq']}
 let g:ale_fixers = {'python': ['autopep8'],
 				   \'C': ['gcc'],
 				   \'C++': ['gcc'],
-				   \'go': ['gofmt']}
+				   \'go': ['gofmt'],
+				   \'javascript': ['prettier', 'eslint']}
 
 nmap <C-k> <Plug>(ale_fix)
 
@@ -701,3 +712,4 @@ function! StripTrailingWhitespace()
 endfunction
 
 autocmd! BufWritePost ~/.vimrc nested :source ~/.vimrc
+autocmd! BufLeave ~/.vimrc nested :source ~/.vimrc
