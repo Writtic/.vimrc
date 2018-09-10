@@ -23,7 +23,7 @@ set nocompatible            " not compatible with vi
 set autoread                " detect when a file is changed
 set langmenu=en_US.UTF-8
 
-set history=1000            " change history to 1000
+set history=800            " change history to 1000
 set textwidth=250
 
 if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
@@ -73,10 +73,8 @@ call plug#begin('~/.local/share/nvim/plugged')
 
 	" Language support
 	Plug 'davidhalter/jedi-vim'
-	Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 	Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 	Plug 'sebdah/vim-delve'
-	Plug 'posva/vim-vue'
 
 	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
@@ -371,7 +369,8 @@ map <C-m> :cprevious<CR>
 nnoremap <leader>a :cclose<CR>
 
 " Golang settings
-let g:go_auto_type_info = 1
+let g:go_version_warning = 0
+let g:go_auto_type_info = 0
 
 let g:go_highlight_build_constraints = 1
 let g:go_highlight_extra_types = 1
@@ -381,25 +380,25 @@ let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_types = 1
 
-au FileType go nmap <leader>gb <Plug>(go-build)
-au FileType go nmap <leader>gr <Plug>(go-run)
-au FileType go nmap <leader>gi <Plug>(go-info)
-au FileType go nmap <leader>gp <Plug>(go-play)
-au FileType go nmap <leader>gt :GoDeclsDir<CR>
-au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
-au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
-au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
-au FileType go nmap <F9> :GoCoverageToggle -short<CR>
-au FileType go nmap <F10> :GoTest -short<CR>
-au FileType go nmap <F12> <Plug>(go-def-tab)
-au FileType go nmap <leader>gm :GoImports<CR>
+" au FileType go nmap <leader>gb <Plug>(go-build)
+" au FileType go nmap <leader>gr <Plug>(go-run)
+" au FileType go nmap <leader>gi <Plug>(go-info)
+" au FileType go nmap <leader>gp <Plug>(go-play)
+" au FileType go nmap <leader>gt :GoDeclsDir<CR>
+" au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
+" au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
+" au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
+" au FileType go nmap <F9> :GoCoverageToggle -short<CR>
+" au FileType go nmap <F10> :GoTest -short<CR>
+" au FileType go nmap <F12> <Plug>(go-def-tab)
+" au FileType go nmap <leader>gm :GoImports<CR>
+"
+" au FileType go nmap <leader>gd :DlvDebug<CR>
+" au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
+" au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
+" au FileType go nmap <leader>gg :DlvClearAll<CR>
 
-au FileType go nmap <leader>gd :DlvDebug<CR>
-au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
-au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
-au FileType go nmap <leader>gg :DlvClearAll<CR>
-
-au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+" au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
 " Jedi settings
 let g:jedi#completions_enabled = 0
@@ -421,15 +420,16 @@ let g:airline_section_y = '%{&fenc . " " . WebDevIconsGetFileFormatSymbol()}'
 let g:airline_theme = 'onedark'
 
 " python syntax
-let g:python_highlight_all = 1
 let g:python_highlight_builtins = 1
-let g:python_highlight_builtins_objs = 1
+let g:python_highlight_builtin_objs = 1
 let g:python_highlight_builtin_funcs = 1
+let g:python_highlight_builtin_funcs_kwarg = 1
 let g:python_highlight_exceptions = 1
 let g:python_highlight_string_formatting = 1
 let g:python_highlight_string_format = 1
 let g:python_highlight_string_templates = 1
 let g:python_highlight_class_vars = 1
+let g:python_highlight_file_headers_as_comments = 0
 
 " python settings
 let g:python_host_prog = $HOME. '/.pyenv/versions/2.7.11/envs/nvim2/bin/python2.7'
@@ -437,6 +437,9 @@ let g:python3_host_prog = $HOME. '/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
 
 " Skip the check of neovim module
 let g:python3_host_skip_check = 1
+
+" polyglot disable
+let g:polyglot_disabled = ['go']
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
@@ -475,8 +478,8 @@ function! s:check_back_space() abort "{{{
 endfunction"}}}
 
 " ale
-nmap <silent> <C-k><C-j> <Plug>(ale_previous_wrap)
-nmap <silent> <C-j><C-k> <Plug>(ale_next_wrap)
+nnoremap <silent> <C-k><C-j> <Plug>(ale_previous_wrap)
+nnoremap <silent> <C-j><C-k> <Plug>(ale_next_wrap)
 
 " Error and warning signs.
 let g:ale_sign_error = '⤫'
@@ -500,7 +503,10 @@ let g:ale_fixers = {'python': ['autopep8'],
 				   \'go': ['gofmt'],
 				   \'javascript': ['prettier', 'eslint']}
 
-nmap <C-k> <Plug>(ale_fix)
+" Ale python
+let g:ale_python_flake8_executable = 'pipenv'
+
+nnoremap <silent> <leader>k <Plug>(ale_fix)
 
 " Set this variable to 1 to fix files when you save them.
 let g:ale_fix_on_save = 1
@@ -673,7 +679,7 @@ augroup auto_comment
 augroup END
 
 " quick-scope
-let g:qs_max_chars=80
+let g:qs_max_chars=120
 
 highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
 highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
