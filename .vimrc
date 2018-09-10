@@ -75,6 +75,7 @@ call plug#begin('~/.local/share/nvim/plugged')
 	Plug 'davidhalter/jedi-vim'
 	Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 	Plug 'sebdah/vim-delve'
+	Plug 'alvan/vim-closetag'
 
 	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
@@ -494,8 +495,8 @@ let g:ale_linters = {'python': ['flake8'],
 					\'C': ['gcc', 'clang','cpplint'],
 					\'C++': ['gcc', 'clang','cpplint'],
 					\'go': ['golint'],
-					\'javascript': ['eslint'],
 					\'bash': ['shell -n flag'],
+				    \'javascript': ['prettier', 'eslint']}
 					\'JSON': ['jq']}
 let g:ale_fixers = {'python': ['autopep8'],
 				   \'C': ['gcc'],
@@ -515,6 +516,33 @@ let g:ale_set_quickfix = 1
 let g:ale_list_window_size = 5  " Show 5 lines of errors (default: 10)
 let g:ale_lint_on_text_changed = 'never'  " Remove lag
 let g:ale_lint_on_enter = 0  " no linting on entering file
+
+" closetag
+" filenames like *.xml, *.html, *.xhtml, ...
+" These are the file extensions where this plugin is enabled.
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.vue'
+
+" filenames like *.xml, *.xhtml, ...
+" This will make the list of non-closing tags self-closing in the specified files.
+let g:closetag_xhtml_filenames = '*.xhtml,*.jsx'
+
+" filetypes like xml, html, xhtml, ...
+" These are the file types where this plugin is enabled.
+let g:closetag_filetypes = 'html,xhtml,phtml,vue'
+
+" filetypes like xml, xhtml, ...
+" This will make the list of non-closing tags self-closing in the specified files.
+let g:closetag_xhtml_filetypes = 'xhtml,jsx'
+
+" integer value [0|1]
+" This will make the list of non-closing tags case-sensitive (e.g. `<Link>` will be closed while `<link>` won't.)
+let g:closetag_emptyTags_caseSensitive = 1
+
+" Shortcut for closing tags, default is '>'
+let g:closetag_shortcut = '>'
+
+" Add > at current position without closing the current tag, default is ''
+let g:closetag_close_shortcut = '<leader>>'
 
 " make the highlighting of tabs and other non-text less annoying
 highlight SpecialKey ctermbg=none ctermfg=8
