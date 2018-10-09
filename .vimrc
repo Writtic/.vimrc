@@ -26,18 +26,30 @@ set langmenu=en_US.UTF-8
 set history=800            " change history to 1000
 set textwidth=250
 
-if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
-    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
-        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+if has('nvim')
+	if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
+		silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
+			\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+		autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	endif
+else
+	if empty(glob('~/.vim/autoload/plug.vim'))
+		silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+			\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+		autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	endif
 endif
 
 " Specify a directory for plugins
 " - For Neovim: ~/.local/share/nvim/plugged
 " - Avoid using standard Vim directory names like 'plugin'
 " Specify a directory for plugins
-call plug#begin('~/.local/share/nvim/plugged')
 
+if has('nvim')
+	call plug#begin('~/.local/share/nvim/plugged')
+else
+	call plug#begin('~/.vim/plugged')
+endif
     " highlight
     Plug 'gerw/vim-HiLinkTrace'
     Plug 'sheerun/vim-polyglot'
@@ -57,7 +69,7 @@ call plug#begin('~/.local/share/nvim/plugged')
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'airblade/vim-gitgutter'
     Plug 'jeetsukumaran/vim-buffergator'
-    Plug 'bronson/vim-trailing-whitespace'
+    " Plug 'bronson/vim-trailing-whitespace'
     Plug 'Raimondi/delimitMate'
     Plug 'vim-scripts/The-NERD-Tree'
     Plug 'vim-scripts/ReplaceWithRegister'
@@ -73,9 +85,13 @@ call plug#begin('~/.local/share/nvim/plugged')
 
 	" Language support
 	Plug 'davidhalter/jedi-vim'
-	Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
+	" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+	if has('nvim')
+		Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
+	else
+		Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
+	endif
 	Plug 'sebdah/vim-delve'
-	Plug 'alvan/vim-closetag'
 
 	" Ctags / Cscope
 	Plug 'ludovicchabant/vim-gutentags'
@@ -264,7 +280,7 @@ if has("nvim")
 	" insert mode - line
 	let &t_SI .= "\<Esc>[5 q"
 	" replace mode - underline
-	let &t_SR .= "\<Esc>[4 q"
+	let &t_SR .= "\<Esc>[3 q"
 	" common - block
 	let &t_EI .= "\<Esc>[3 q"
 elseif ( has("termguicolors") )
@@ -321,13 +337,10 @@ nnoremap <leader>F :execute 'edit' expand("%:p:h")<cr>
 " remap U to <C-r> for easier redo
 nnoremap U <C-r>
 
-set t_kb=^V<BS>
-set t_kD=^V<DEL>
-
-" cnoremap <C-j> <t_kd>
-" cnoremap <C-k> <t_ku>
-" cnoremap <C-a> <Home>
-" cnoremap <C-e> <End>
+if has('nvim')
+	set t_kb=^V<BS>
+	set t_kD=^V<DEL>
+endif
 
 " Switch # *
 nnoremap # *
@@ -350,10 +363,21 @@ nmap <leader>r  <Plug>ReplaceWithRegisterOperator
 nmap <leader>rr <Plug>ReplaceWithRegisterLine
 xmap <leader>r  <Plug>ReplaceWithRegisterVisual
 
-"Leader lt maps to last tab
+" Leader lt maps to last tab
 let g:lasttab = 1
 nmap <Leader>lt :exe "tabn ".g:lasttab<CR>
 autocmd TabLeave * let g:lasttab = tabpagenr()
+
+" using tab pages
+set switchbuf=usetab
+nnoremap <F8> :sbnext<CR>
+nnoremap <S-F8> :sbprevious<CR>
+let notabs = 0
+nnoremap <silent> <F8> :let notabs=!notabs<Bar>:if notabs<Bar>:tabo<Bar>:else<Bar>:tab ball<Bar>:tabn<Bar>:endif<CR>
+nnoremap <C-j> :tabprevious<CR>
+nnoremap <C-k> :tabnext<CR>
+nnoremap <silent> <A-Left> :execute 'silent! tabmove ' . (tabpagenr()-2)<CR>
+nnoremap <silent> <A-Right> :execute 'silent! tabmove ' . (tabpagenr()+1)<CR>
 
 " devicons
 " set font terminal font or set gui vim font to a Nerd Font (https://github.com/ryanoasis/nerd-fonts):
@@ -381,25 +405,23 @@ let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_types = 1
 
-" au FileType go nmap <leader>gb <Plug>(go-build)
-" au FileType go nmap <leader>gr <Plug>(go-run)
-" au FileType go nmap <leader>gi <Plug>(go-info)
-" au FileType go nmap <leader>gp <Plug>(go-play)
-" au FileType go nmap <leader>gt :GoDeclsDir<CR>
-" au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
-" au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
-" au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
-" au FileType go nmap <F9> :GoCoverageToggle -short<CR>
-" au FileType go nmap <F10> :GoTest -short<CR>
-" au FileType go nmap <F12> <Plug>(go-def-tab)
-" au FileType go nmap <leader>gm :GoImports<CR>
-"
-" au FileType go nmap <leader>gd :DlvDebug<CR>
-" au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
-" au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
-" au FileType go nmap <leader>gg :DlvClearAll<CR>
+au FileType go nmap <leader>gb <Plug>(go-build)
+au FileType go nmap <leader>gr <Plug>(go-run)
+au FileType go nmap <leader>gi <Plug>(go-info)
+au FileType go nmap <leader>gp <Plug>(go-play)
+au FileType go nmap <leader>gt :GoDeclsDir<CR>
+au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
+au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
+au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
+au FileType go nmap <F9> :GoCoverageToggle -short<CR>
+au FileType go nmap <F10> :GoTest -short<CR>
+au FileType go nmap <F12> <Plug>(go-def-tab)
+au FileType go nmap <leader>gm :GoImports<CR>
 
-" au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+au FileType go nmap <leader>gd :DlvDebug<CR>
+au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
+au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
+au FileType go nmap <leader>gg :DlvClearAll<CR>
 
 " Jedi settings
 let g:jedi#completions_enabled = 0
@@ -433,6 +455,9 @@ let g:python_highlight_class_vars = 1
 let g:python_highlight_file_headers_as_comments = 0
 
 " python settings
+if !has('nvim')
+	set pyxversion=3
+endif
 let g:python_host_prog = $HOME. '/.pyenv/versions/2.7.11/envs/nvim2/bin/python2.7'
 let g:python3_host_prog = $HOME. '/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
 
@@ -461,7 +486,11 @@ let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', '
 let g:deoplete#auto_complete_delay = 1000
 
 " deoplete-golang
-let g:deoplete#sources#go#gocode_binary = $HOME. '/go/bin/gocode'
+if has('mac')
+    let g:deoplete#sources#go#gocode_binary = $HOME. '/go/bin/gocode'
+else
+    let g:deoplete#sources#go#gocode_binary = '/kakao/go/bin/gocode'
+endif
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
 " deoplete-jedi
@@ -495,8 +524,8 @@ let g:ale_linters = {'python': ['flake8'],
 					\'C': ['gcc', 'clang','cpplint'],
 					\'C++': ['gcc', 'clang','cpplint'],
 					\'go': ['golint'],
+					\'javascript': ['eslint'],
 					\'bash': ['shell -n flag'],
-				    \'javascript': ['prettier', 'eslint']}
 					\'JSON': ['jq']}
 let g:ale_fixers = {'python': ['autopep8'],
 				   \'C': ['gcc'],
@@ -506,6 +535,7 @@ let g:ale_fixers = {'python': ['autopep8'],
 
 " Ale python
 let g:ale_python_flake8_executable = 'pipenv'
+let g:ale_python_autopip8_executable = 'pipenv'
 
 nnoremap <silent> <leader>k <Plug>(ale_fix)
 
@@ -517,33 +547,6 @@ let g:ale_list_window_size = 5  " Show 5 lines of errors (default: 10)
 let g:ale_lint_on_text_changed = 'never'  " Remove lag
 let g:ale_lint_on_enter = 0  " no linting on entering file
 
-" closetag
-" filenames like *.xml, *.html, *.xhtml, ...
-" These are the file extensions where this plugin is enabled.
-let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.vue'
-
-" filenames like *.xml, *.xhtml, ...
-" This will make the list of non-closing tags self-closing in the specified files.
-let g:closetag_xhtml_filenames = '*.xhtml,*.jsx'
-
-" filetypes like xml, html, xhtml, ...
-" These are the file types where this plugin is enabled.
-let g:closetag_filetypes = 'html,xhtml,phtml,vue'
-
-" filetypes like xml, xhtml, ...
-" This will make the list of non-closing tags self-closing in the specified files.
-let g:closetag_xhtml_filetypes = 'xhtml,jsx'
-
-" integer value [0|1]
-" This will make the list of non-closing tags case-sensitive (e.g. `<Link>` will be closed while `<link>` won't.)
-let g:closetag_emptyTags_caseSensitive = 1
-
-" Shortcut for closing tags, default is '>'
-let g:closetag_shortcut = '>'
-
-" Add > at current position without closing the current tag, default is ''
-let g:closetag_close_shortcut = '<leader>>'
-
 " make the highlighting of tabs and other non-text less annoying
 highlight SpecialKey ctermbg=none ctermfg=8
 highlight NonText ctermbg=none ctermfg=8
@@ -554,10 +557,10 @@ highlight Normal guibg=NONE ctermbg=NONE
 autocmd VimEnter * hi Normal ctermbg=NONE
 
 " Italic
-let g:onedark_termcolors=256
-let g:onedark_terminal_italics=1
-highlight Comment cterm=italic
-highlight htmlArg cterm=italic
+" let g:onedark_termcolors=256
+" let g:onedark_terminal_italics=1
+" highlight Comment cterm=italic
+" highlight htmlArg cterm=italic
 
 " loading the plugin
 let g:webdevicons_enable = 1
@@ -575,7 +578,7 @@ let g:NERDCompactSexyComs = 1
 let g:NERDCommentEmptyLines = 1
 
 " Enable trimming of trailing whitespace when uncommenting
-let g:NERDTrimTrailingWhitespace = 1
+let g:NERDTrimTrailingWhitespace = 0
 
 " NERDTree On shortcut
 nnoremap <leader>nt <ESC>:NERDTree<CR>
@@ -707,14 +710,13 @@ augroup auto_comment
 augroup END
 
 " quick-scope
-let g:qs_max_chars=120
+let g:qs_max_chars=180
 
 highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
 highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
 
 " Trigger a highlight in the appropriate direction when pressing these keys:
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
-
 
 " AutoSetFileHead
 autocmd BufNewFile *.sh,*.py exec ":call AutoSetFileHead()"
@@ -727,22 +729,12 @@ function! AutoSetFileHead()
     " python
     if &filetype == 'python'
         call setline(1, "\#!/usr/bin/env python")
-        call append(1, "\# encoding: utf-8")
+        call append(1, "\# -*- coding: utf-8 -*-")
     endif
 
     normal G
     normal o
     normal o
-endfunction
-
-" automatically remove trailing whitespace before write
-function! StripTrailingWhitespace()
-	normal mZ
-	%s/\s\+$//e
-	if line("'Z") != line(".")
-		echo "Stripped whitespace\n"
-	endif
-	normal `Z
 endfunction
 
 autocmd! BufWritePost ~/.vimrc nested :source ~/.vimrc
