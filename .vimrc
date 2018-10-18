@@ -113,7 +113,6 @@ endif
 
 	" python
 	Plug 'davidhalter/jedi-vim'
-	Plug 'gotcha/vimpdb'
 
 	" go
 	Plug 'godoctor/godoctor.vim'
