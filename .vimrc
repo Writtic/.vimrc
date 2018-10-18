@@ -14,10 +14,6 @@ cnoreabbrev WQ wq
 cnoreabbrev W w
 cnoreabbrev Q q
 cnoreabbrev Qall qall
-abbr funciton function
-abbr teh the
-abbr tempalte template
-abbr fitler filter
 
 set nocompatible            " not compatible with vi
 set autoread                " detect when a file is changed
@@ -44,53 +40,90 @@ endif
 " - For Neovim: ~/.local/share/nvim/plugged
 " - Avoid using standard Vim directory names like 'plugin'
 " Specify a directory for plugins
-
 if has('nvim')
 	call plug#begin('~/.local/share/nvim/plugged')
 else
 	call plug#begin('~/.vim/plugged')
 endif
+	" git
+	Plug 'tpope/vim-fugitive'					" The git things
+	Plug 'tpope/vim-rhubarb'					" :Gbrowse, hub
+	Plug 'airblade/vim-gitgutter'				" +/-/~ signs in the gutter
+	Plug 'jreybert/vimagit'						" Magit in vim
+	Plug 'gregsexton/gitv', {'on': ['Gitv']}	" :Gitv is a bit like tig
+	Plug 'junkblocker/patchreview-vim'			" Dependency for vim-codereview
+	Plug 'codegram/vim-codereview'				" Use :CodeReview https://github.com/myorganization/myrepo/pulls/1234
+	Plug 'idanarye/vim-merginal'				" view/switch branches with :Merginal
+
     " highlight
     Plug 'gerw/vim-HiLinkTrace'
     Plug 'sheerun/vim-polyglot'
 
     " theme
     Plug 'joshdick/onedark.vim'
-    Plug 'ryanoasis/vim-devicons'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
 
 	" tmux
 	Plug 'tmux-plugins/vim-tmux-focus-events'
+	Plug 'christoomey/vim-tmux-navigator'
+	Plug 'benmills/vimux'
+	Plug 'benmills/vimux-golang'
 
     " utils
-	Plug 'vim-scripts/Rename'
-	Plug 'unblevable/quick-scope'
-    Plug 'ctrlpvim/ctrlp.vim'
-    Plug 'airblade/vim-gitgutter'
-    Plug 'jeetsukumaran/vim-buffergator'
-    " Plug 'bronson/vim-trailing-whitespace'
-    Plug 'Raimondi/delimitMate'
-    Plug 'vim-scripts/The-NERD-Tree'
+	Plug 'junegunn/vim-peekaboo'			" \" / @ / ctrl-r
+	Plug 'will133/vim-dirdiff'				" :DirDiff check directory diff
+	Plug 'vim-scripts/Rename'				" :saveas <newfile> then removes the old filename on the disk.
+	Plug 'ervandew/supertab'
+    Plug 'Raimondi/delimitMate'				" Automatic closing of quotes, parenthesis, brackets, etc.
     Plug 'vim-scripts/ReplaceWithRegister'
     Plug 'scrooloose/nerdcommenter'
-    Plug 'tpope/vim-repeat'
-    Plug 'tpope/vim-fugitive'
-    Plug 'tpope/vim-surround'
     Plug 'Shougo/echodoc.vim'
     Plug 'Shougo/vimshell.vim'
-    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
-	Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do' : './install --all' }
-	Plug 'junegunn/fzf.vim'
 
-	" Language support
+	" tpope
+	Plug 'tpope/vim-surround'          " Operate on surrounding 
+	Plug 'tpope/vim-speeddating'       " Increment dates
+	Plug 'tpope/vim-repeat'            " Repeat plugins
+	Plug 'tpope/vim-commentary'        " Comment out blocks
+	Plug 'tpope/vim-abolish'           " Flexible search
+	Plug 'tpope/vim-jdaddy'            " JSON text object
+	Plug 'tpope/vim-obsession'         " Continuously save buffer state
+	Plug 'tpope/vim-tbone'			   " :Tyank, :Tput use buffer on tmux 
+
+	" text objects and editing
+	Plug 'kana/vim-textobj-user'
+	Plug 'kana/vim-textobj-entire'
+	Plug 'vim-scripts/argtextobj.vim'
+	Plug 'michaeljsmith/vim-indent-object'
+	Plug 'bkad/CamelCaseMotion'
+	Plug 'glts/vim-textobj-comment'         " Use text object with 'c'
+	Plug 'jeetsukumaran/vim-indentwise'
+
+	" navigation and fuzzy
+    Plug 'ctrlpvim/ctrlp.vim'				" Find files faster by name
+	Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do' : './install --all' }
+	Plug 'junegunn/fzf.vim'					" Find within files
+    Plug 'ryanoasis/vim-devicons'			" Icons for NERDTree etc
+    Plug 'vim-scripts/The-NERD-Tree'
+	Plug 'Xuyuanp/nerdtree-git-plugin'
+	Plug 'sunaku/vim-shortcut'				" Searchable key mappings
+    Plug 'jeetsukumaran/vim-buffergator'	" Buffer listing
+	Plug 'unblevable/quick-scope'
+
+	" python
 	Plug 'davidhalter/jedi-vim'
-	" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+	Plug 'gotcha/vimpdb'
+
+	" go
+	Plug 'godoctor/godoctor.vim'
 	if has('nvim')
 		Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 	else
 		Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 	endif
+	" Plug 'fatih/vim-go', { 'tag': '*', 'do': ':GoUpdateBinaries' }
+	Plug 'buoto/gotests-vim'
 	Plug 'sebdah/vim-delve'
 
 	" Ctags / Cscope
@@ -101,7 +134,7 @@ endif
     " linter
     Plug 'w0rp/ale'
 
-    " auto completion
+    " deoplete auto completion
 	if has('nvim')
 		Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 	else
@@ -112,6 +145,12 @@ endif
 	Plug 'zchee/deoplete-clang'
 	Plug 'zchee/deoplete-go', { 'do': 'make' }
 	Plug 'zchee/deoplete-jedi'
+
+	" snippets
+	Plug 'SirVer/ultisnips' " Track the engine.
+	Plug 'honza/vim-snippets' " Snippets are separated from the engine. Add this if you want them:
+
+	Plug 'thanthese/Tortoise-Typing'
 call plug#end()
 
 filetype plugin on
@@ -145,6 +184,7 @@ set tabstop=4               " the visible width of tabs
 set softtabstop=4           " edit as if the tabs are 4 characters wide
 set shiftwidth=4            " number of spaces to use for indent and unindent
 set shiftround              " round indent to a multiple of 'shiftwidth'
+
 " neocomplete like
 set completeopt=longest,menuone
 set completeopt-=preview
@@ -172,7 +212,7 @@ set noshowmode              " don't show which mode disabled for PowerLine
 set wildmode=list:longest   " complete files like a shell
 set scrolloff=3             " lines of text around cursor
 set shell=$SHELL
-set cmdheight=1             " command bar height
+set cmdheight=2             " command bar height
 set title                   " set terminal title
 
 " Searching
@@ -306,6 +346,16 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
+" CamelCaseMotion
+map <silent> w <Plug>CamelCaseMotion_w
+map <silent> b <Plug>CamelCaseMotion_b
+map <silent> e <Plug>CamelCaseMotion_e
+map <silent> ge <Plug>CamelCaseMotion_ge
+sunmap w
+sunmap b
+sunmap e
+sunmap ge
+
 " Go to home and end using capitalized directions
 noremap H ^
 noremap L $
@@ -405,26 +455,40 @@ let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_types = 1
 
-au FileType go nmap <leader>gb <Plug>(go-build)
-au FileType go nmap <leader>gr <Plug>(go-run)
-au FileType go nmap <leader>gi <Plug>(go-info)
-au FileType go nmap <leader>gp <Plug>(go-play)
-au FileType go nmap <leader>gt :GoDeclsDir<CR>
-au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
-au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
-au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
-au FileType go nmap <F9> :GoCoverageToggle -short<CR>
-au FileType go nmap <F10> :GoTest -short<CR>
-au FileType go nmap <F12> <Plug>(go-def-tab)
-au FileType go nmap <leader>gm :GoImports<CR>
+au BufEnter * silent! lcd %:p:h
 
-au FileType go nmap <leader>gd :DlvDebug<CR>
-au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
-au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
-au FileType go nmap <leader>gg :DlvClearAll<CR>
+augroup go
+	autocmd!
+	au FileType go nmap <leader>gb <Plug>(go-build)
+	au FileType go nmap <leader>gr <Plug>(go-run)
+	au FileType go nmap <leader>gi <Plug>(go-info)
+	au FileType go nmap <leader>gp <Plug>(go-play)
+	au FileType go nmap <leader>gt :GoDeclsDir<CR>
+	au Filetype go nmap <leader>ga <Plug>(go-alternate-edit)
+	au Filetype go nmap <leader>gah <Plug>(go-alternate-split)
+	au Filetype go nmap <leader>gav <Plug>(go-alternate-vertical)
+	au FileType go nmap <F9> :GoCoverageToggle -short<CR>
+	au FileType go nmap <F10> :GoTest -short<CR>
+	au FileType go nmap <F12> <Plug>(go-def-tab)
+	au FileType go nmap <leader>gm :GoImports<CR>
 
-" Jedi settings
-let g:jedi#completions_enabled = 0
+	" :GoAlternate  commands :A, :AV, :AS and :AT
+	au FileType go nmap <leader>gd :DlvDebug<CR>
+	au FileType go nmap <leader>gs :DlvToggleBreakpoint<CR>
+	au FileType go nmap <leader>gx :DlvToggleTracepoint<CR>
+	au FileType go nmap <leader>gg :DlvClearAll<CR>
+augroup END
+
+" build_go_files is a custom function that builds or compiles the test file.
+" It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
+function! s:build_go_files()
+	let l:file = expand('%')
+	if l:file =~# '^\f\+_test\.go$'
+		call go#test#Test(0, 1)
+	elseif l:file =~# '^\f\+\.go$'
+		call go#cmd#Build(0)
+	endif
+endfunction
 
 " for vim-airline
 let g:airline#extensions#tabline#enabled = 1 " turn on buffer list
@@ -465,7 +529,7 @@ let g:python3_host_prog = $HOME. '/.pyenv/versions/3.6.5/envs/nvim3/bin/python3'
 let g:python3_host_skip_check = 1
 
 " polyglot disable
-let g:polyglot_disabled = ['go']
+let g:polyglot_disabled = ['go', 'python']
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
@@ -473,6 +537,7 @@ let g:deoplete#enable_smart_case = 1
 let g:deoplete#enable_ignore_case = 1
 
 let g:echodoc#enable_at_startup = 1
+let g:deoplete#auto_complete_delay = 300
 
 " deoplete-clang
 if has('mac')
@@ -483,7 +548,6 @@ else
 	let g:deoplete#sources#clang#clang_header = $HOME. '/.pyenv/versions/miniconda3-latest/lib/clang'
 endif
 let g:deoplete#sources#clang#std = {'c': 'c11', 'cpp': 'c++14', 'objc': 'c11', 'objcpp': 'c++1z'}
-let g:deoplete#auto_complete_delay = 1000
 
 " deoplete-golang
 if has('mac')
@@ -494,9 +558,15 @@ endif
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
 " deoplete-jedi
+let g:jedi#completions_enabled = 0
+let g:jedi#completions_command = "<Tab>"
+au FileType *.py let g:jedi#goto_command = "<C-]>"
+
 let g:deoplete#sources#jedi#popup_select_first = 1
-let g:deoplete#sources#jedi#show_call_signatures = 0
+let g:deoplete#sources#jedi#show_call_signatures = 1
 let g:deoplete#sources#jedi#enable_cache = 1
+let g:deoplete#sources#jedi#show_docstring = 1
+let g:deoplete#sources#jedi#python_path = $HOME. '/.pyenv/shims/python'
 
 inoremap <silent><expr> <TAB>
     \ pumvisible() ? "\<C-n>" :
@@ -565,23 +635,19 @@ autocmd VimEnter * hi Normal ctermbg=NONE
 " loading the plugin
 let g:webdevicons_enable = 1
 
-" adding the flags to NERDTree
-let g:webdevicons_enable_nerdtree = 1
-
-" Add spaces after comment delimiters by default
-let g:NERDSpaceDelims = 1
-
-" Use compact syntax for prettified multi-line comments
-let g:NERDCompactSexyComs = 1
-
-" Allow commenting and inverting empty lines (useful when commenting a region)
-let g:NERDCommentEmptyLines = 1
-
-" Enable trimming of trailing whitespace when uncommenting
-let g:NERDTrimTrailingWhitespace = 0
+let g:webdevicons_enable_nerdtree = 1  " adding the flags to NERDTree
+let g:NERDSpaceDelims = 1		 	   " Add spaces after comment delimiters by default
+let g:NERDCompactSexyComs = 1		   " Use compact syntax for prettified multi-line comments
+let g:NERDCommentEmptyLines = 1		   " Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDTrimTrailingWhitespace = 0   " Enable trimming of trailing whitespace when uncommenting
 
 " NERDTree On shortcut
 nnoremap <leader>nt <ESC>:NERDTree<CR>
+
+" Start NERDTree when no files specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+autocmd VimEnter * wincmd w
 
 " Ctrl
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
@@ -621,10 +687,10 @@ let g:gutentags_cache_dir = expand('~/.cache/tags')
 let g:gutentags_auto_add_gtags_cscope = 0
 
 
-noremap <m-u> :PreviewScroll -1<CR>
-noremap <m-d> :PreviewScroll +1<CR>
-inoremap <m-u> <c-\><c-o>:PreviewScroll -1<CR>
-inoremap <m-d> <c-\><c-o>:PreviewScroll +1<CR>
+noremap <M-u> :PreviewScroll -1<CR>
+noremap <M-d> :PreviewScroll +1<CR>
+inoremap <M-u> <c-\><c-o>:PreviewScroll -1<CR>
+inoremap <M-d> <c-\><c-o>:PreviewScroll +1<CR>
 
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
@@ -642,12 +708,9 @@ endfun
 nnoremap <silent> <c-]> :call MatchCaseTag()<CR>
 
 " Buffergator setting
-" Use Right side for Buffergator
-let g:buffergator_viewport_split_policy = 'R'
-" Designate custom key setting
-let g:buffergator_suppress_keymaps = 1
-" Looper buffers
-let g:buffergator_mru_cycle_loop = 1
+let g:buffergator_viewport_split_policy = 'R' " Use Right side for Buffergator
+let g:buffergator_suppress_keymaps = 1 " Designate custom key setting
+let g:buffergator_mru_cycle_loop = 1 " Looper buffers
 nmap <leader>qq :BuffergatorMruCyclePrev<CR>
 nmap <leader>ww :BuffergatorMruCycleNext<CR>
 nmap <leader>bl :BuffergatorOpen<CR>
@@ -669,7 +732,7 @@ nnoremap <silent> <leader>} :exe "vertical resize " . (winheight(0) * 3/2)<CR>
 nnoremap <silent> <leader>{ :exe "vertical resize " . (winheight(0) * 2/3)<CR>
 
 " Vim search highlighting
-nnoremap <C-l> :nohlsearch<CR><C-l>
+nnoremap <silent> <leader><C-l> :nohlsearch<CR>
 autocmd InsertEnter * :setlocal nohlsearch
 autocmd InsertLeave * :setlocal hlsearch
 
@@ -709,6 +772,11 @@ augroup auto_comment
     au FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
 
+" snippets
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+
 " quick-scope
 let g:qs_max_chars=180
 
@@ -738,4 +806,4 @@ function! AutoSetFileHead()
 endfunction
 
 autocmd! BufWritePost ~/.vimrc nested :source ~/.vimrc
-autocmd! BufLeave ~/.vimrc nested :source ~/.vimrc
+" autocmd! BufLeave ~/.vimrc nested :source ~/.vimrc
