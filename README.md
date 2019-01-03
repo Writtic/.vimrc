@@ -29,19 +29,19 @@ $ pip install --upgrade pip
 ## neovim install
 ```
 $ sudo -E apt-get install neovim -y && \
-$ sudo -E pip install --upgrade virtualenv && \
-$ sudo -E pip install --upgrade neovim && \
-$ sudo -E pip3 install --upgrade neovim
+sudo -E pip install --upgrade virtualenv && \
+sudo -E pip install --upgrade neovim && \
+sudo -E pip3 install --upgrade neovim
 ```
 
 ## config update
 ```
 $ sudo update-alternatives --install /usr/bin/vi vi /usr/bin/nvim 60 && \
-$ sudo update-alternatives --config vi && \
-$ sudo update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60 && \
-$ sudo update-alternatives --config vim && \
-$ sudo update-alternatives --install /usr/bin/editor editor /usr/bin/nvim 60 && \
-$ sudo update-alternatives --config editor
+sudo update-alternatives --config vi && \
+sudo update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60 && \
+sudo update-alternatives --config vim && \
+sudo update-alternatives --install /usr/bin/editor editor /usr/bin/nvim 60 && \
+sudo update-alternatives --config editor
 ```
 
 Common
