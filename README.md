@@ -18,7 +18,11 @@ $ sudo -E apt-get update -y
 
 ## python install
 ```
-$ sudo apt-get install python-pip python-dev python3-venv build-essential -y && \
+$ sudo apt-get install -y build-essential python-dev python-setuptools python-pip python-smbus
+$ sudo apt-get install -y libncursesw5-dev libgdbm-dev libc6-dev
+$ sudo apt-get install -y zlib1g-dev libsqlite3-dev tk-dev
+$ sudo apt-get install -y libssl-dev openssl
+$ sudo apt-get install -y libffi-dev
 $ pip install --upgrade pip
 ```
 
